@@ -1,0 +1,8 @@
+filetransferclient:	filetransferclient.o DieWithError.o
+	gcc filetransferclient.o DieWithError.o -o filetransferclient
+
+filetransferclient.o:	filetransferclient.c
+	gcc -c filetransferclient.c
+
+DieWithError.o:	DieWithError.c
+	gcc -c DieWithError.c

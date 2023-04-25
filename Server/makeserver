@@ -1,0 +1,11 @@
+filetransferserver:	filetransferserver.o HandleFileTransferClient.o DieWithError.o
+	gcc filetransferserver.o HandleFileTransferClient.o DieWithError.o -o filetransferserver
+
+filetransferserver.o:	filetransferserver.c
+	gcc -c filetransferserver.c
+
+HandleFileTransferClient.o:	HandleFileTransferClient.c
+	gcc -c HandleFileTransferClient.c
+
+DieWithError.o:	DieWithError.c
+	gcc -c DieWithError.c
