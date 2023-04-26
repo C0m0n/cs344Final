@@ -1,8 +1,8 @@
-filetransferclient:	filetransferclient.o DieWithError.o
-	gcc filetransferclient.o DieWithError.o -o filetransferclient
+clientWithMenu:	clientWithMenu.o DieWithError.o
+	gcc clientWithMenu.o DieWithError.o -o clientWithMenu
 
-filetransferclient.o:	filetransferclient.c
-	gcc -c filetransferclient.c
+clientWithMenu.o:	clientWithMenu.c
+	gcc -c clientWithMenu.c
 
 DieWithError.o:	DieWithError.c
 	gcc -c DieWithError.c
