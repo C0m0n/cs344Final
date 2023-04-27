@@ -32,6 +32,7 @@ void talkToServer(int);
 unsigned int displayMenuAndSendSelection(int);
 void sendName(int);
 void sendNumber(int);
+void getFile(long, int);
 
 int main(int argc, char *argv[])
 {
@@ -89,6 +90,7 @@ void talkToServer(int sock)
 {
     unsigned int selection = 0;
     unsigned char bye[5];
+    long fileSize = 0;
 
     while(1)
     {
@@ -98,6 +100,8 @@ void talkToServer(int sock)
         {
             case 1:
                 sendName(sock);
+                get(sock, fileSize, sizeof(long));
+                getFile(fileSize, sock);
                 break;
             case 2:
                 sendNumber(sock);
@@ -140,6 +144,7 @@ void sendName(int sock)
     printf("%s\n", msg);
     memset(name, 0, NAME_SIZE);
     fgets(name, NAME_SIZE, stdin);
+    printf("%s\n", name);
     put(sock, name, NAME_SIZE);
 }
 
@@ -156,3 +161,59 @@ void sendNumber(int sock)
     put(sock, &number, sizeof(int));
 }
 
+
+
+void get(int sock, void *buffer, unsigned int bufferSize)
+{
+    int totalBytesReceived = 0;
+    int bytesReceived = 0;
+
+    while (totalBytesReceived < bufferSize) {
+        bytesReceived = recv(sock, buffer + totalBytesReceived, bufferSize - totalBytesReceived, 0);
+        if (bytesReceived < 0)
+            DieWithError("recv() failed");
+        else if (bytesReceived == 0)
+            DieWithError("Connection closed prematurely");
+        totalBytesReceived += bytesReceived;
+    }
+}
+
+void put(int sock, void *buffer, unsigned int bufferSize)
+{
+    int totalBytesSent = 0;
+    int bytesSent = 0;
+
+    while (totalBytesSent < bufferSize) {
+        bytesSent = send(sock, buffer + totalBytesSent, bufferSize - totalBytesSent, 0);
+        if (bytesSent < 0)
+            DieWithError("send() failed");
+        totalBytesSent += bytesSent;
+    }
+}
+
+void getFile(long fileSize, int fileSocket)
+{
+	printf("Here is the file:\n");
+	//get file
+	while (fileSize > 0)
+	{
+		char fileBuffer[1025];
+		memset(fileBuffer, 0, 1025);
+		if(fileSize > 1024)
+		{
+			get(fileSocket, fileBuffer, 1024);
+			fileBuffer[1024] = '\0';
+			fileSize -= 1024;
+		}
+		else
+		{
+			get(fileSocket,fileBuffer, fileSize);
+			//printf("n is %d\n", n);
+			fileBuffer[fileSize] = '\0';
+			fileSize = 0;			
+		}
+		
+		printf("%s", fileBuffer);
+	}
+	printf("\n");
+}
