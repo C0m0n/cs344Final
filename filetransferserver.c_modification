@@ -1,0 +1,26 @@
+#include <sys/wait.h>
+
+for (;;) {
+    clntLen = sizeof(fileClntAddr);
+    clntSock = accept(servSock, (struct sockaddr *) &fileClntAddr, &clntLen);
+
+    if (clntSock < 0)
+        DieWithError("accept() failed");
+
+    printf("Handling client %s\n", inet_ntoa(fileClntAddr.sin_addr));
+
+    // Fork a child process for each client
+    pid_t childPid = fork();
+
+    if (childPid == 0) {
+        close(servSock); // Child process does not need the listening socket
+        HandleFileTransferClient(clntSock);
+        close(clntSock);
+        exit(0); // Terminate the child process
+    } else if (childPid > 0) {
+        close(clntSock); // Parent process does not need the connected socket
+        waitpid(-1, NULL, WNOHANG); // Reap child processes
+    } else {
+        DieWithError("fork() failed");
+    }
+}
