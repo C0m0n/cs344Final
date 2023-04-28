@@ -32,7 +32,7 @@ void talkToServer(int);
 unsigned int displayMenuAndSendSelection(int);
 void sendName(int);
 void sendNumber(int);
-void getFile(long, int);
+void getFile(unsigned long, int);
 
 int main(int argc, char *argv[])
 {
@@ -90,18 +90,21 @@ void talkToServer(int sock)
 {
     unsigned int selection = 0;
     unsigned char bye[5];
-    long fileSize = 0;
+    unsigned long fileSize = 0;
 
     while(1)
     {
+        printf("Befrore display menu\n");
         selection = displayMenuAndSendSelection(sock);
         printf("Client selected: %d\n", selection);
         switch(selection)
         {
             case 1:
                 sendName(sock);
-                get(sock, fileSize, sizeof(long));
+                get(sock, &fileSize, sizeof(unsigned long));
                 getFile(fileSize, sock);
+                printf("File received\n");
+                
                 break;
             case 2:
                 sendNumber(sock);
@@ -191,7 +194,7 @@ void put(int sock, void *buffer, unsigned int bufferSize)
     }
 }
 
-void getFile(long fileSize, int fileSocket)
+void getFile(unsigned long fileSize, int fileSocket)
 {
 	printf("Here is the file:\n");
 	//get file
@@ -214,6 +217,9 @@ void getFile(long fileSize, int fileSocket)
 		}
 		
 		printf("%s", fileBuffer);
+        printf("File size is %ld\n", fileSize);
 	}
+    printf("DONENENENENENEN\n");
 	printf("\n");
+    return;
 }

@@ -169,7 +169,7 @@ void HandleFileTransferClient(int clntSock)
 */
 void sendFileToClient(char * filename, int fileSocket)
 {
-    long fileSize;
+    unsigned long fileSize;
     // opening the file in read mode 
     
     printf("Opening file: %s", filename);
@@ -184,14 +184,14 @@ void sendFileToClient(char * filename, int fileSocket)
 	fileSize = findSize(fp);
 	
 	//Send file size to client but convert to network order first
-	fileSize = htonl(fileSize);
+	//fileSize = htonl(fileSize);
     printf("Sending file size: %ld\n", fileSize);
-	put(fileSocket, fileSize, sizeof(long));
+	put(fileSocket, &fileSize, sizeof(unsigned long));
     printf("Sent file size\n");
 	//fflush(fileSocket);
 	
 	//Change fileSize back to use it
-	fileSize = ntohl(fileSize);
+	// fileSize = ntohl(fileSize);
 	printf("File size: %ld\n", fileSize);
 
 	sendToClient(fileSize, fp, fileSocket);
@@ -224,7 +224,7 @@ void sendToClient(long fileSize, FILE * fp, int fileSocket)
 		memset(fileBuffer, 0, 1025);
 		if(fileSize > 1024)
 		{
-            printf("In if\n");
+            // printf("In if\n");
 			fread(fileBuffer, 1024, 1, fp);
 			put(fileSocket, fileBuffer, 1024);
 			fileBuffer[1024] = '\0';
@@ -232,7 +232,7 @@ void sendToClient(long fileSize, FILE * fp, int fileSocket)
 		}
 		else
 		{
-            printf("In else\n");
+            // printf("In else\n");
 			fread(fileBuffer, fileSize, 1, fp);
 			put(fileSocket, fileBuffer, 1024);
 			fileBuffer[fileSize] = '\0';
