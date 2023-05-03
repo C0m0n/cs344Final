@@ -1,11 +1,12 @@
-filetransferserver:	filetransferserver.o HandleFileTransferClient.o DieWithError.o
-	gcc filetransferserver.o HandleFileTransferClient.o DieWithError.o -o filetransferserver
+serverWithMenu: serverWithMenu.o HandleTCPClientWithMenu.o DieWithError.o
+	gcc serverWithMenu.o HandleTCPClientWithMenu.o DieWithError.o -o serverWithMenu
 
-filetransferserver.o:	filetransferserver.c
-	gcc -c filetransferserver.c
 
-HandleFileTransferClient.o:	HandleFileTransferClient.c
-	gcc -c HandleFileTransferClient.c
+serverWithMenu.o:	serverWithMenu.c
+	gcc -c serverWithMenu.c
+
+HandleTCPClientWithMenu.o:	HandleTCPClientWithMenu.c
+	gcc -c HandleTCPClientWithMenu.c
 
 DieWithError.o:	DieWithError.c
 	gcc -c DieWithError.c
