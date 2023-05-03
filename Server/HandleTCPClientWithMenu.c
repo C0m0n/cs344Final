@@ -81,13 +81,13 @@ void askForName(int sock, char * name, unsigned int size)
     put(sock, msg, sizeof(msg));
     memset(name, 0, NAME_SIZE);
     get(sock, name, NAME_SIZE);
+    name[strcspn(name, "\n")] = '\0';
 }
 
 void doSomethingWithName(char * name, int fileSocket)
 {
     printf("Received name from the client: %s\n", name);
     sendFileToClient(name, fileSocket);
-
 }
 
 void askForNumber(int sock, int * numPtr, unsigned int size)
@@ -112,7 +112,7 @@ void get(int sock, void *buffer, unsigned int bufferSize)
 {
     int totalBytesReceived = 0;
     int bytesReceived = 0;
-
+    memset(buffer, 0, bufferSize);
     while (totalBytesReceived < bufferSize) {
         bytesReceived = recv(sock, buffer + totalBytesReceived, bufferSize - totalBytesReceived, 0);
         if (bytesReceived < 0)
@@ -238,7 +238,7 @@ void sendToClient(long fileSize, FILE * fp, int fileSocket)
 			fileBuffer[fileSize] = '\0';
 			fileSize = 0;			
 		}
-		//fflush(fileSocket);
+		// fflush(fileSocket);
 		printf("%s", fileBuffer);
 	}
 

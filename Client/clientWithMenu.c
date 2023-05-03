@@ -88,12 +88,19 @@ int main(int argc, char *argv[])
 
 void talkToServer(int sock)
 {
+    
     unsigned int selection = 0;
     unsigned char bye[5];
     unsigned long fileSize = 0;
+    struct menu menuBuffer;
 
     while(1)
     {
+        // memset(&menuBuffer, 0, sizeof(struct menu));
+        get(sock, &menuBuffer, sizeof(struct menu));
+        printf("%s\n", menuBuffer.line1);
+        printf("%s\n", menuBuffer.line2);
+        printf("%s\n", menuBuffer.line3);
         printf("Befrore display menu\n");
         selection = displayMenuAndSendSelection(sock);
         printf("Client selected: %d\n", selection);
@@ -104,7 +111,7 @@ void talkToServer(int sock)
                 get(sock, &fileSize, sizeof(unsigned long));
                 getFile(fileSize, sock);
                 printf("File received\n");
-                
+                displayMenuAndSendSelection(sock);
                 break;
             case 2:
                 sendNumber(sock);
@@ -126,12 +133,13 @@ unsigned int displayMenuAndSendSelection(int sock)
     char junk;
 
     printf("Inside client display menu\n");
-    get(sock, &menuBuffer, sizeof(struct menu));  //in this case server is also sending null
-    printf("%s\n", menuBuffer.line1);
-    printf("%s\n", menuBuffer.line2);
-    printf("%s\n", menuBuffer.line3);
+    memset(&menuBuffer, 0, sizeof(struct menu));
+    // get(sock, &menuBuffer, sizeof(struct menu));  //in this case server is also sending null
+    // printf("%s\n", menuBuffer.line1);
+    // printf("%s\n", menuBuffer.line2);
+    // printf("%s\n", menuBuffer.line3);
     scanf("%d", &response);
-    getc(stdin);
+    // getc(stdin);
     output = htonl(response);
     put(sock, &output, sizeof(unsigned int));
     return response;
