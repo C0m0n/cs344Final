@@ -110,8 +110,8 @@ void talkToServer(int sock)
         {
             case 1:
                 sendName(sock);
-                get(sock, &fileSize, sizeof(unsigned long));
-                getFile(fileSize, sock);
+                get(sock, &fileSize, sizeof(unsigned long)); //Get the file size from the server
+                getFile(fileSize, sock); //This function will get the file from the server using the file size
                 printf("File received\n");
                 break;
             case 2:
@@ -136,15 +136,16 @@ unsigned int displayMenuAndSendSelection(int sock)
     char junk;
 
     // printf("Inside client display menu\n");
+    //Receive menu from server
     memset(&menuBuffer, 0, sizeof(struct menu));
     get(sock, &menuBuffer, sizeof(struct menu));  //in this case server is also sending null
     printf("%s\n", menuBuffer.line1);
     printf("%s\n", menuBuffer.line2);
     printf("%s\n", menuBuffer.line3);
-    scanf("%d", &response);
+    scanf("%d", &response); //Wait for the user to enter a selection
     getc(stdin);
     output = htonl(response);
-    put(sock, &output, sizeof(unsigned int));
+    put(sock, &output, sizeof(unsigned int)); //Send the selection to the server
     return response;
 }
 
@@ -153,20 +154,20 @@ void sendName(int sock)
     unsigned char msg[21];
     unsigned char name[NAME_SIZE];
 
-    memset(msg, 0, sizeof(msg));
-    get(sock, msg, sizeof(msg));
+    memset(msg, 0, sizeof(msg)); //clear the buffer
+    get(sock, msg, sizeof(msg)); //get the message from the server
     printf("%s\n", msg);
-    memset(name, 0, NAME_SIZE);
-    fgets(name, NAME_SIZE, stdin);
+    memset(name, 0, NAME_SIZE); //clear the buffer
+    fgets(name, NAME_SIZE, stdin); //get the name of the file from the user
     printf("%s\n", name);
-    put(sock, name, NAME_SIZE);
+    put(sock, name, NAME_SIZE); //send the name of the file to the server
 }
 
 void sendNumber(int sock)
 {
+    //This function will send the server the number that the user selected.
     unsigned char msg[21];
     int number;
-
     memset(msg, 0, sizeof(msg));
     get(sock, msg, sizeof(msg));
     printf("%s\n", msg);

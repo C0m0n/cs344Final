@@ -42,6 +42,7 @@ long findSize(FILE * fp);
 void sendToClient(long fileSize, FILE * fp, int);
 void ls_dir2();
 
+//Main
 void HandleTCPClient(int clntSocket)
 {
     int recvMsgSize;                    /* Size of received message */
@@ -68,39 +69,42 @@ void HandleTCPClient(int clntSocket)
         }
         response = sendMenuAndWaitForResponse(clntSocket);
     }//end while
-
+    //send bye
     put(clntSocket, bye, sizeof(bye));
     close(clntSocket);    /* Close client socket */
     printf("Connection with client %d closed.\n", clntSocket);
 }
 
+
 unsigned int sendMenuAndWaitForResponse(int clntSocket)
 {
     struct menu mainMenu;
     unsigned int response = 0;
+    //Clear out main menu
     memset(&mainMenu, 0, sizeof(struct menu));   /* Zero out structure */
     strcpy(mainMenu.line1,"1) Transfer File\n");
     strcpy(mainMenu.line2, "2) Print Directory\n");
     strcpy(mainMenu.line3, "3) Quit\n");
     printf("Sending menu\n");
-    put(clntSocket, &mainMenu, sizeof(struct menu));
-    get(clntSocket, &response, sizeof(unsigned int));
-    return ntohl(response);
+    put(clntSocket, &mainMenu, sizeof(struct menu)); //send menu
+    get(clntSocket, &response, sizeof(unsigned int)); //get response
+    return ntohl(response); //Convert the responce from network to host byte order
 }
 
 void askForName(int sock, char * name, unsigned int size)
 {
     unsigned char msg[21];
-    memset(msg, 0, sizeof(msg));
-    strcpy(msg, "Enter name:\n");
-    put(sock, msg, sizeof(msg));
-    memset(name, 0, NAME_SIZE);
-    get(sock, name, NAME_SIZE);
-    name[strcspn(name, "\n")] = '\0';
+    memset(msg, 0, sizeof(msg)); //Clear message
+    strcpy(msg, "Enter name:\n"); // Set message
+    put(sock, msg, sizeof(msg)); //Send message
+    memset(name, 0, NAME_SIZE); //Clear name
+    get(sock, name, NAME_SIZE); //Get name
+    name[strcspn(name, "\n")] = '\0'; //Remove newline
 }
 
 void doSomethingWithName(char * name, int fileSocket)
 {
+    //This function does nothing
     printf("Received name from the client: %s\n", name);
     sendFileToClient(name, fileSocket);
 }
@@ -187,12 +191,13 @@ void HandleFileTransferClient(int clntSock)
 */
 void sendFileToClient(char * filename, int fileSocket)
 {
+    //This function just send the file size to the cliend then calls sendToClient to send the file contents.
     unsigned long fileSize;
     // opening the file in read mode 
     
     printf("Opening file: %s", filename);
     strtok(filename, "\n"); // Remove newline character
-    FILE* fp = fopen(filename, "r"); 
+    FILE* fp = fopen(filename, "r"); //Open file
   
     // checking if the file exist or not 
     if (fp == NULL) 
@@ -202,14 +207,10 @@ void sendFileToClient(char * filename, int fileSocket)
 	fileSize = findSize(fp);
 	
 	//Send file size to client but convert to network order first
-	//fileSize = htonl(fileSize);
     printf("Sending file size: %ld\n", fileSize);
 	put(fileSocket, &fileSize, sizeof(unsigned long));
     printf("Sent file size\n");
-	//fflush(fileSocket);
-	
-	//Change fileSize back to use it
-	// fileSize = ntohl(fileSize);
+
 	printf("File size: %ld\n", fileSize);
 
 	sendToClient(fileSize, fp, fileSocket);
@@ -239,10 +240,11 @@ void sendToClient(long fileSize, FILE * fp, int fileSocket)
 	{
 
 		char fileBuffer[1025];
-		memset(fileBuffer, 0, 1025);
+		memset(fileBuffer, 0, 1025); //Clear buffer
 		if(fileSize > 1024)
 		{
             // printf("In if\n");
+            //Only send the first 1024 bytes
 			fread(fileBuffer, 1024, 1, fp);
 			put(fileSocket, fileBuffer, 1024);
 			fileBuffer[1024] = '\0';
@@ -250,6 +252,7 @@ void sendToClient(long fileSize, FILE * fp, int fileSocket)
 		}
 		else
 		{
+            //Send the whole thing to the client
             // printf("In else\n");
 			fread(fileBuffer, fileSize, 1, fp);
 			put(fileSocket, fileBuffer, 1024);
@@ -263,17 +266,19 @@ void sendToClient(long fileSize, FILE * fp, int fileSocket)
 }
 
 void ls_dir2() {
+    //Use current directory
     char *dname = "./";
   DIR *dp;
   struct dirent *dirp;
   struct stat dstat, *sp;
+  //open directory
   dp = opendir(dname);
   char dnamecpy[1024];
   while ((dirp = readdir(dp)) != NULL) {
-    strcpy(dnamecpy, dname);
-    strcat(dnamecpy, "/");
-    strcat(dnamecpy, dirp->d_name);
-    lstat(dnamecpy, &dstat);
+    strcpy(dnamecpy, dname); //Copy directory name
+    strcat(dnamecpy, "/"); //Add slash
+    strcat(dnamecpy, dirp->d_name); //Add file name
+    lstat(dnamecpy, &dstat); //Get file info
     printf("%s", dirp->d_name);
     if (S_ISDIR(sp->st_mode)) {
       printf("*");
