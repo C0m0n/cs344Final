@@ -143,7 +143,7 @@ unsigned int displayMenuAndSendSelection(int sock)
     printf("%s\n", menuBuffer.line2);
     printf("%s\n", menuBuffer.line3);
     scanf("%d", &response); //Wait for the user to enter a selection
-    // getc(stdin);
+    getc(stdin);
     output = htonl(response);
     put(sock, &output, sizeof(unsigned int)); //Send the selection to the server
     return response;
@@ -172,9 +172,9 @@ void sendNumber(int sock)
     memset(msg, 0, sizeof(msg));
     //get(sock, msg, sizeof(msg));
     //printf("%s\n", msg);
-    scanf("%d", &number);
-    number = htonl(number);
-    put(sock, &number, sizeof(int));
+    // scanf("%d", &number);
+    // number = htonl(number);
+    // put(sock, &number, sizeof(int));
     get(sock, buffer, 1024);
     printf("%s\n", buffer);
 }
@@ -214,6 +214,7 @@ void put(int sock, void *buffer, unsigned int bufferSize)
 void getFile(unsigned long fileSize, int fileSocket)
 {
 	printf("Here is the file:\n");
+    printf("File size is %ld \n ", fileSize);
 	//get file
 	while (fileSize > 0)
 	{
@@ -227,7 +228,7 @@ void getFile(unsigned long fileSize, int fileSocket)
 		}
 		else
 		{
-			get(fileSocket,fileBuffer, fileSize);
+			get(fileSocket,fileBuffer, sizeof(fileBuffer));
 			//printf("n is %d\n", n);
 			fileBuffer[fileSize] = '\0';
 			fileSize = 0;			
