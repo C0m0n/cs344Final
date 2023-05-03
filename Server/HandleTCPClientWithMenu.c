@@ -3,10 +3,24 @@
 #include <unistd.h>     /* for close() */
 #include <stdlib.h>
 #include <string.h>
+#include <dirent.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <sys/stat.h>
+#include <time.h>
+#include <sys/types.h>
+#include <dirent.h>
+#include <libgen.h>
+#include <unistd.h>
+#include <errno.h>
 
 #define RCVBUFSIZE 32   /* Size of receive buffer */
 #define NAME_SIZE 21 /*Includes room for null */
 #define FILE_NAME_SIZE 51 /*Includes room for null */
+
+char * t1 ="xwrxwrxwr-------"; //This is NOT an error. They must be reversed.
+char * t2 = "----------------";
 
 struct menu{
   unsigned char line1[20];
@@ -21,11 +35,12 @@ unsigned int sendMenuAndWaitForResponse(int);
 void askForName(int sock, char *, unsigned int);
 void doSomethingWithName(char *, int);
 void askForNumber(int sock, int *, unsigned int);
-void doSomethingWithNumber(int);
+void doSomethingWithNumber(int, int);
 void sendFileToClient(char * , int);
 void HandleTCPClient(int clntSocket);   /* TCP client handling function */
 long findSize(FILE * fp);
 void sendToClient(long fileSize, FILE * fp, int);
+void ls_dir2();
 
 void HandleTCPClient(int clntSocket)
 {
@@ -46,8 +61,8 @@ void HandleTCPClient(int clntSocket)
                     doSomethingWithName(name, clntSocket);
                     break;
             case 2: printf("Client selected 2.\n");
-                    askForNumber(clntSocket, &number, sizeof(int));
-                    doSomethingWithNumber(number);
+                    // askForNumber(clntSocket, &number, sizeof(int));
+                    doSomethingWithNumber(2, clntSocket);
                     break;
             default: printf("Client selected junk.\n"); put(clntSocket, errorMsg, sizeof(errorMsg)); break;
         }
@@ -102,9 +117,10 @@ void askForNumber(int sock, int * numPtr, unsigned int size)
     *numPtr = ntohl(numIn);
 }
 
-void doSomethingWithNumber(int number)
+void doSomethingWithNumber(int number, int sock)
 {
     printf("Received number from the client: %d\n", number);
+    ls_dir2();
 }
 
 
@@ -121,6 +137,7 @@ void get(int sock, void *buffer, unsigned int bufferSize)
             DieWithError("Connection closed prematurely");
         totalBytesReceived += bytesReceived;
     }
+    printf("Received: %s\n", buffer);
 }
 
 void put(int sock, void *buffer, unsigned int bufferSize)
@@ -135,6 +152,7 @@ void put(int sock, void *buffer, unsigned int bufferSize)
         totalBytesSent += bytesSent;
  
     }
+    printf("Sent: %s\n", buffer);
 }
 
 
@@ -243,6 +261,28 @@ void sendToClient(long fileSize, FILE * fp, int fileSocket)
 	}
 
 }
+
+void ls_dir2() {
+    char *dname = "./";
+  DIR *dp;
+  struct dirent *dirp;
+  struct stat dstat, *sp;
+  dp = opendir(dname);
+  char dnamecpy[1024];
+  while ((dirp = readdir(dp)) != NULL) {
+    strcpy(dnamecpy, dname);
+    strcat(dnamecpy, "/");
+    strcat(dnamecpy, dirp->d_name);
+    lstat(dnamecpy, &dstat);
+    printf("%s", dirp->d_name);
+    if (S_ISDIR(sp->st_mode)) {
+      printf("*");
+    }
+    printf("\n");
+  }
+
+}
+
 /*
 void HandleServerError(FILE * fileSocket){
 	printf("Error sending Error Message\n");

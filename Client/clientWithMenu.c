@@ -33,6 +33,7 @@ unsigned int displayMenuAndSendSelection(int);
 void sendName(int);
 void sendNumber(int);
 void getFile(unsigned long, int);
+void getDirectory(int, unsigned long);
 
 int main(int argc, char *argv[])
 {
@@ -92,16 +93,17 @@ void talkToServer(int sock)
     unsigned int selection = 0;
     unsigned char bye[5];
     unsigned long fileSize = 0;
-    struct menu menuBuffer;
+    unsigned long numbOfFiles = 0;
+    // struct menu menuBuffer;
 
     while(1)
     {
         // memset(&menuBuffer, 0, sizeof(struct menu));
-        get(sock, &menuBuffer, sizeof(struct menu));
-        printf("%s\n", menuBuffer.line1);
-        printf("%s\n", menuBuffer.line2);
-        printf("%s\n", menuBuffer.line3);
-        printf("Befrore display menu\n");
+        // get(sock, &menuBuffer, sizeof(struct menu));
+        // printf("%s\n", menuBuffer.line1);
+        // printf("%s\n", menuBuffer.line2);
+        // printf("%s\n", menuBuffer.line3);
+        // printf("Befrore display menu\n");
         selection = displayMenuAndSendSelection(sock);
         printf("Client selected: %d\n", selection);
         switch(selection)
@@ -111,10 +113,11 @@ void talkToServer(int sock)
                 get(sock, &fileSize, sizeof(unsigned long));
                 getFile(fileSize, sock);
                 printf("File received\n");
-                displayMenuAndSendSelection(sock);
                 break;
             case 2:
                 sendNumber(sock);
+                // get(sock, &numbOfFiles, sizeof(unsigned long));
+                // getDirectory(sock, numbOfFiles);
                 break;
             }
         if(selection == 3) break;
@@ -132,14 +135,14 @@ unsigned int displayMenuAndSendSelection(int sock)
     unsigned int output;
     char junk;
 
-    printf("Inside client display menu\n");
+    // printf("Inside client display menu\n");
     memset(&menuBuffer, 0, sizeof(struct menu));
-    // get(sock, &menuBuffer, sizeof(struct menu));  //in this case server is also sending null
-    // printf("%s\n", menuBuffer.line1);
-    // printf("%s\n", menuBuffer.line2);
-    // printf("%s\n", menuBuffer.line3);
+    get(sock, &menuBuffer, sizeof(struct menu));  //in this case server is also sending null
+    printf("%s\n", menuBuffer.line1);
+    printf("%s\n", menuBuffer.line2);
+    printf("%s\n", menuBuffer.line3);
     scanf("%d", &response);
-    // getc(stdin);
+    getc(stdin);
     output = htonl(response);
     put(sock, &output, sizeof(unsigned int));
     return response;
@@ -187,6 +190,7 @@ void get(int sock, void *buffer, unsigned int bufferSize)
             DieWithError("Connection closed prematurely");
         totalBytesReceived += bytesReceived;
     }
+    // printf("Received: %s\n", buffer);
 }
 
 void put(int sock, void *buffer, unsigned int bufferSize)
@@ -200,6 +204,7 @@ void put(int sock, void *buffer, unsigned int bufferSize)
             DieWithError("send() failed");
         totalBytesSent += bytesSent;
     }
+    // printf("Sent: %s\n", buffer);
 }
 
 void getFile(unsigned long fileSize, int fileSocket)
@@ -208,8 +213,8 @@ void getFile(unsigned long fileSize, int fileSocket)
 	//get file
 	while (fileSize > 0)
 	{
-		char fileBuffer[1025];
-		memset(fileBuffer, 0, 1025);
+		char fileBuffer[1024];
+		memset(fileBuffer, 0, 1024);
 		if(fileSize > 1024)
 		{
 			get(fileSocket, fileBuffer, 1024);
@@ -225,9 +230,24 @@ void getFile(unsigned long fileSize, int fileSocket)
 		}
 		
 		printf("%s", fileBuffer);
-        printf("File size is %ld\n", fileSize);
+        // printf("File size is %ld\n", fileSize);
 	}
-    printf("DONENENENENENEN\n");
-	printf("\n");
-    return;
+    // printf("DONENENENENENEN\n");
+	// printf("\n");
+}
+
+void getDirectory(int sock, unsigned long numbOfFiles){
+
+    unsigned long i = 0;
+    unsigned long fileSize = 0;
+    unsigned char fileName[NAME_SIZE];
+    unsigned char fileBuffer[1024];
+    for(i = 0; i < ntohl(numbOfFiles); i++)
+    {
+        memset(fileName, 0, NAME_SIZE);
+        get(sock, fileName, NAME_SIZE);
+        printf("%s\n", fileName);
+    }
+    
+    
 }
