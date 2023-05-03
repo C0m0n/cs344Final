@@ -40,7 +40,7 @@ void sendFileToClient(char * , int);
 void HandleTCPClient(int clntSocket);   /* TCP client handling function */
 long findSize(FILE * fp);
 void sendToClient(long fileSize, FILE * fp, int);
-void ls_dir2();
+void ls_dir2(int );
 
 //Main
 void HandleTCPClient(int clntSocket)
@@ -116,7 +116,7 @@ void askForNumber(int sock, int * numPtr, unsigned int size)
 
     memset(msg, 0, sizeof(msg));
     strcpy(msg, "Enter number:\n");
-    put(sock, msg, sizeof(msg));
+    // put(sock, msg, sizeof(msg));
     get(sock, &numIn, sizeof(int));
     *numPtr = ntohl(numIn);
 }
@@ -124,7 +124,7 @@ void askForNumber(int sock, int * numPtr, unsigned int size)
 void doSomethingWithNumber(int number, int sock)
 {
     printf("Received number from the client: %d\n", number);
-    ls_dir2();
+    ls_dir2(sock);
 }
 
 
@@ -239,8 +239,8 @@ void sendToClient(long fileSize, FILE * fp, int fileSocket)
 	while (fileSize > 0)
 	{
 
-		char fileBuffer[1025];
-		memset(fileBuffer, 0, 1025); //Clear buffer
+		char fileBuffer[1024];
+		memset(fileBuffer, 0, 1024); //Clear buffer
 		if(fileSize > 1024)
 		{
             // printf("In if\n");
@@ -265,7 +265,7 @@ void sendToClient(long fileSize, FILE * fp, int fileSocket)
 
 }
 
-void ls_dir2() {
+void ls_dir2(int sock) {
     //Use current directory
     char *dname = "./";
   DIR *dp;
@@ -274,18 +274,22 @@ void ls_dir2() {
   //open directory
   dp = opendir(dname);
   char dnamecpy[1024];
+  char buffer[1024];
   while ((dirp = readdir(dp)) != NULL) {
     strcpy(dnamecpy, dname); //Copy directory name
     strcat(dnamecpy, "/"); //Add slash
     strcat(dnamecpy, dirp->d_name); //Add file name
     lstat(dnamecpy, &dstat); //Get file info
     printf("%s", dirp->d_name);
+    char * temp = dirp->d_name;
+    strcat(temp, "\n");
+    strcat(buffer, dirp->d_name);
     if (S_ISDIR(sp->st_mode)) {
       printf("*");
     }
     printf("\n");
   }
-
+    put(sock, buffer, sizeof(buffer));
 }
 
 /*

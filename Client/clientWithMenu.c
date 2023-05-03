@@ -33,7 +33,7 @@ unsigned int displayMenuAndSendSelection(int);
 void sendName(int);
 void sendNumber(int);
 void getFile(unsigned long, int);
-void getDirectory(int, unsigned long);
+void getDirectory(int);
 
 int main(int argc, char *argv[])
 {
@@ -117,7 +117,7 @@ void talkToServer(int sock)
             case 2:
                 sendNumber(sock);
                 // get(sock, &numbOfFiles, sizeof(unsigned long));
-                // getDirectory(sock, numbOfFiles);
+                //getDirectory(sock);
                 break;
             }
         if(selection == 3) break;
@@ -143,7 +143,7 @@ unsigned int displayMenuAndSendSelection(int sock)
     printf("%s\n", menuBuffer.line2);
     printf("%s\n", menuBuffer.line3);
     scanf("%d", &response); //Wait for the user to enter a selection
-    getc(stdin);
+    // getc(stdin);
     output = htonl(response);
     put(sock, &output, sizeof(unsigned int)); //Send the selection to the server
     return response;
@@ -168,12 +168,15 @@ void sendNumber(int sock)
     //This function will send the server the number that the user selected.
     unsigned char msg[21];
     int number;
+    char buffer[4000];
     memset(msg, 0, sizeof(msg));
-    get(sock, msg, sizeof(msg));
-    printf("%s\n", msg);
+    //get(sock, msg, sizeof(msg));
+    //printf("%s\n", msg);
     scanf("%d", &number);
     number = htonl(number);
     put(sock, &number, sizeof(int));
+    get(sock, buffer, 1024);
+    printf("%s\n", buffer);
 }
 
 
@@ -237,18 +240,14 @@ void getFile(unsigned long fileSize, int fileSocket)
 	// printf("\n");
 }
 
-void getDirectory(int sock, unsigned long numbOfFiles){
+void getDirectory(int sock){
 
-    unsigned long i = 0;
-    unsigned long fileSize = 0;
-    unsigned char fileName[NAME_SIZE];
-    unsigned char fileBuffer[1024];
-    for(i = 0; i < ntohl(numbOfFiles); i++)
-    {
-        memset(fileName, 0, NAME_SIZE);
-        get(sock, fileName, NAME_SIZE);
-        printf("%s\n", fileName);
-    }
+    char buffer[4000];
+    
+    
+
+    
+    
     
     
 }
